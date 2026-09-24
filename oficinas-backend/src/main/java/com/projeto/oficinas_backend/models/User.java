@@ -27,15 +27,16 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true) 
+    @Column(unique = true)
     private String email;
 
     private String username;
+
+    @Column(name = "password")
     private String senha;
 
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
-    @Column(name = "role", columnDefinition = "role")
+    @Column(name = "role", columnDefinition = "user_role")
     private RoleUser tipo;
-
 }
