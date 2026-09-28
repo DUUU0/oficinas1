@@ -1,83 +1,92 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast, Toaster } from "react-hot-toast";
 import userService from "../../services/UserService";
+import { apiClient } from "../../services/api";
 import styles from "./styles.module.scss";
 
-// Tipagem para os itens de aulas gravadas
-interface VideoLesson {
-  id: string;
-  title: string;
-  professor: string;
-  date: string;
-  duration: string;
-  hasPdfTranscription: boolean;
-  hasSubtitles: boolean;
+interface Materia {
+  id: number;
+  nome: string;
 }
 
-export const DashboardPage: React.FC = () => {
-  const username = userService.getUsername() || "Usuário";
-  const role = userService.getRole() || "aluno";
+interface Professor {
+  id: number;
+  nome: string;
+  materiaId: number | null;
+  materiaNome: string | null;
+  userId: number | null;
+  gravacaoAutomatica: boolean;
+}
 
-  // Estados simulados do Hardware Pan-Tilt e do Sistema
-  const [isRecording, setIsRecording] = useState(false);
-  const [autoRecordMode, setAutoRecordMode] = useState(true);
-  const [panAngle] = useState(45);
-  const [tiltAngle] = useState(12);
-  const [targetLocked] = useState(true);
+interface Face {
+  id: number;
+  professorId: number;
+  encoding: string;
+}
 
-  // Lista simulada de aulas
-  const [lessons] = useState<VideoLesson[]>([
-    {
-      id: "1",
-      title: "Arquitetura do Mecanismo Pan-Tilt e Servomotores",
-      professor: "Prof. Eduardo Machado",
-      date: "24/09/2026",
-      duration: "45m 20s",
-      hasPdfTranscription: true,
-      hasSubtitles: true,
-    },
-    {
-      id: "2",
-      title: "Ajuste Fino de Controle PID e Rastreamento Facial",
-      professor: "Prof. João Trevisan",
-      date: "22/09/2026",
-      duration: "58m 10s",
-      hasPdfTranscription: true,
-      hasSubtitles: true,
-    },
-    {
-      id: "3",
-      title: "Visão Computacional Aplicada a Gravação de Aulas",
-      professor: "Prof. Pedro Vianna",
-      date: "18/09/2026",
-      duration: "40m 00s",
-      hasPdfTranscription: false,
-      hasSubtitles: true,
-    },
-  ]);
+export const DashboardAluno: React.FC = () => {
+  const username = userService.getUsername() || "Aluno";
 
-  const handleToggleRecording = () => {
-    if (isRecording) {
-      setIsRecording(false);
-      toast.success("Gravação encerrada e salva com sucesso!");
-    } else {
-      setIsRecording(true);
-      toast.success("Gravação iniciada no suporte Pan-Tilt!");
-    }
-  };
+  const [materias, setMaterias] = useState<Materia[]>([]);
+  const [professores, setProfessores] = useState<Professor[]>([]);
+  const [faces, setFaces] = useState<Face[]>([]);
+  const [selectedMateriaId, setSelectedMateriaId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const handleToggleAutoRecordMode = () => {
-    setAutoRecordMode(!autoRecordMode);
-    toast(
-      !autoRecordMode
-        ? "Modo de Início Automático por Reconhecimento Facial ativado!"
-        : "Modo Manual/Gesto 'V' ativado para controle de gravação.",
-      { icon: "🎥" }
-    );
-  };
+  useEffect(() => {
+    let active = true;
 
-  const handleDownloadPdf = (title: string) => {
-    toast.success(`Baixando transcrição da lousa em PDF: ${title}`);
+    const loadData = async () => {
+      try {
+        const [materiasRes, professoresRes] = await Promise.all([
+          apiClient.get<Materia[]>("/materias"),
+          apiClient.get<Professor[]>("/professores"),
+        ]);
+        if (active) {
+          setMaterias(materiasRes.data);
+          setProfessores(professoresRes.data);
+        }
+      } catch {
+        if (active) {
+          toast.error("Falha ao carregar as matérias e professores.");
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+
+      try {
+        const facesRes = await apiClient.get<Face[]>("/faces");
+        if (active) {
+          setFaces(facesRes.data);
+        }
+      } catch {
+        if (active) {
+          setFaces([]);
+        }
+      }
+    };
+
+    loadData();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const selectedMateria = materias.find((m) => m.id === selectedMateriaId) || null;
+
+  const professoresDaMateria = professores.filter(
+    (professor) => professor.materiaId === selectedMateriaId
+  );
+
+  const countProfessores = (materiaId: number) =>
+    professores.filter((professor) => professor.materiaId === materiaId).length;
+
+  const getImageSrc = (professorId: number) => {
+    const face = faces.find((item) => item.professorId === professorId);
+    return face ? `data:image/jpeg;base64,${face.encoding}` : null;
   };
 
   const handleLogout = () => {
@@ -88,22 +97,19 @@ export const DashboardPage: React.FC = () => {
     <div className={styles.dashboardContainer}>
       <Toaster position="top-right" />
 
-      {/* Barra de Navegação Superior */}
       <header className={styles.navbar}>
         <div className={styles.brand}>
-          <div className={styles.logoIcon}>📹</div>
+          <div className={styles.logoIcon}>PT</div>
           <div>
             <h1>Pan-Tilt Autônomo</h1>
-            <span>UTFPR • Rastreamento Facial</span>
+            <span>Aulas Gravadas</span>
           </div>
         </div>
 
         <div className={styles.userSection}>
           <div className={styles.userInfo}>
             <span className={styles.userName}>{username}</span>
-            <span className={`${styles.roleBadge} ${styles[role]}`}>
-              {role.toUpperCase()}
-            </span>
+            <span className={styles.roleBadge}>ALUNO</span>
           </div>
           <button onClick={handleLogout} className={styles.logoutBtn}>
             Sair
@@ -111,137 +117,124 @@ export const DashboardPage: React.FC = () => {
         </div>
       </header>
 
-      {/* Conteúdo Principal */}
       <main className={styles.mainContent}>
-        {/* Cartões de Métricas e Visão Geral */}
-        <section className={styles.metricsGrid}>
-          <div className={styles.metricCard}>
-            <div className={styles.metricHeader}>
-              <span className={styles.metricTitle}>Status da Câmera</span>
-              <span className={`${styles.statusDot} ${styles.active}`}></span>
-            </div>
-            <div className={styles.metricValue}>Conectada</div>
-            <span className={styles.metricSubtitle}>Logitech HD 1080p • 30 FPS</span>
+        <section className={styles.statsGrid}>
+          <div className={styles.statCard}>
+            <span className={styles.statTitle}>Matérias disponíveis</span>
+            <span className={styles.statValue}>{materias.length}</span>
+            <span className={styles.statSubtitle}>Escolha uma para começar</span>
           </div>
 
-          <div className={styles.metricCard}>
-            <div className={styles.metricHeader}>
-              <span className={styles.metricTitle}>Eixos de Rotação</span>
-              <span className={styles.cardIcon}>⚙️</span>
-            </div>
-            <div className={styles.metricValue}>
-              Pan: {panAngle}° | Tilt: {tiltAngle}°
-            </div>
-            <span className={styles.metricSubtitle}>Controle PID Ativo</span>
+          <div className={styles.statCard}>
+            <span className={styles.statTitle}>Professores</span>
+            <span className={styles.statValue}>{professores.length}</span>
+            <span className={styles.statSubtitle}>Com aulas na plataforma</span>
           </div>
 
-          <div className={styles.metricCard}>
-            <div className={styles.metricHeader}>
-              <span className={styles.metricTitle}>Aulas Gravadas</span>
-              <span className={styles.cardIcon}>📁</span>
-            </div>
-            <div className={styles.metricValue}>{lessons.length}</div>
-            <span className={styles.metricSubtitle}>Aulas cadastradas na plataforma</span>
-          </div>
-
-          <div className={styles.metricCard}>
-            <div className={styles.metricHeader}>
-              <span className={styles.metricTitle}>Alvo Rastreado</span>
-              <span
-                className={`${styles.statusDot} ${targetLocked ? styles.active : styles.warning
-                  }`}
-              ></span>
-            </div>
-            <div className={styles.metricValue}>
-              {targetLocked ? "Rosto Travado" : "Buscando Alvo..."}
-            </div>
-            <span className={styles.metricSubtitle}>Prioridade: Primeiro detectado</span>
+          <div className={styles.statCard}>
+            <span className={styles.statTitle}>Matéria selecionada</span>
+            <span className={styles.statValueSmall}>
+              {selectedMateria ? selectedMateria.nome : "Nenhuma"}
+            </span>
+            <span className={styles.statSubtitle}>
+              {selectedMateria
+                ? `${professoresDaMateria.length} professor(es)`
+                : "Selecione ao lado"}
+            </span>
           </div>
         </section>
 
-        {/* Seção de Controle do Hardware Pan-Tilt (Disponível para Professores e Admins) */}
-        {(userService.isAdmin() || userService.isProfessor()) && (
-          <section className={styles.controlPanel}>
-            <h2>Painel de Controle Pan-Tilt</h2>
-            <div className={styles.controlGrid}>
-              <div className={styles.statusBox}>
-                <p>
-                  <strong>Status de Gravação:</strong>{" "}
-                  <span className={isRecording ? styles.recordingText : ""}>
-                    {isRecording ? "● REC - Gravando" : "Pausado / Aguardando"}
-                  </span>
-                </p>
-                <p>
-                  <strong>Gesto Específico:</strong> Mão com Sinal de "V" aciona início/fim
-                </p>
+        <div className={styles.dashboardGrid}>
+          <section className={styles.listCard}>
+            <div className={styles.cardHeader}>
+              <div>
+                <h2>Matérias</h2>
+                <p>Selecione a matéria que deseja estudar.</p>
               </div>
+            </div>
 
-              <div className={styles.actionButtons}>
-                <button
-                  onClick={handleToggleRecording}
-                  className={`${styles.actionBtn} ${isRecording ? styles.dangerBtn : styles.primaryBtn
-                    }`}
-                >
-                  {isRecording ? "Parar Gravação" : "Iniciar Gravação"}
-                </button>
-
-                <button
-                  onClick={handleToggleAutoRecordMode}
-                  className={styles.secondaryBtn}
-                >
-                  Modo: {autoRecordMode ? "Automático" : "Manual / Gesto"}
-                </button>
-              </div>
+            <div className={styles.scrollList}>
+              {loading ? (
+                <p className={styles.emptyText}>Carregando matérias...</p>
+              ) : materias.length === 0 ? (
+                <p className={styles.emptyText}>Nenhuma matéria disponível.</p>
+              ) : (
+                materias.map((materia) => (
+                  <button
+                    key={materia.id}
+                    type="button"
+                    className={`${styles.materiaItem} ${materia.id === selectedMateriaId ? styles.materiaActive : ""
+                      }`}
+                    onClick={() => setSelectedMateriaId(materia.id)}
+                  >
+                    <span className={styles.materiaName}>{materia.nome}</span>
+                    <span className={styles.materiaCount}>
+                      {countProfessores(materia.id)} professor(es)
+                    </span>
+                  </button>
+                ))
+              )}
             </div>
           </section>
-        )}
 
-        {/* Listagem de Aulas com Transcrições da Lousa */}
-        <section className={styles.lessonsSection}>
-          <div className={styles.sectionHeader}>
-            <h2>Aulas Disponíveis e Transcrições</h2>
-            <p>Selecione uma aula para assistir ao vídeo e baixar o PDF com o texto da lousa.</p>
-          </div>
-
-          <div className={styles.lessonsList}>
-            {lessons.map((lesson) => (
-              <div key={lesson.id} className={styles.lessonCard}>
-                <div className={styles.lessonInfo}>
-                  <div className={styles.videoBadge}>VÍDEO</div>
-                  <div>
-                    <h3>{lesson.title}</h3>
-                    <p className={styles.metaInfo}>
-                      <span>👤 {lesson.professor}</span>
-                      <span>📅 {lesson.date}</span>
-                      <span>⏱️ {lesson.duration}</span>
-                    </p>
-                  </div>
-                </div>
-
-                <div className={styles.lessonActions}>
-                  {lesson.hasPdfTranscription && (
-                    <button
-                      onClick={() => handleDownloadPdf(lesson.title)}
-                      className={styles.pdfBtn}
-                      title="Baixar transcrição da escrita em PDF"
-                    >
-                      📄 Baixar PDF Lousa
-                    </button>
-                  )}
-                  <button
-                    onClick={() => toast.success(`Iniciando vídeo: ${lesson.title}`)}
-                    className={styles.watchBtn}
-                  >
-                    ▶ Assistir Aula
-                  </button>
-                </div>
+          <section className={styles.listCard}>
+            <div className={styles.cardHeader}>
+              <div>
+                <h2>
+                  {selectedMateria
+                    ? `Professores de ${selectedMateria.nome}`
+                    : "Professores"}
+                </h2>
+                <p>
+                  {selectedMateria
+                    ? "Selecione um professor para acessar as aulas."
+                    : "Escolha uma matéria para ver os professores."}
+                </p>
               </div>
-            ))}
-          </div>
-        </section>
+            </div>
+
+            <div className={styles.scrollList}>
+              {!selectedMateria ? (
+                <p className={styles.emptyText}>Nenhuma matéria selecionada.</p>
+              ) : professoresDaMateria.length === 0 ? (
+                <p className={styles.emptyText}>
+                  Nenhum professor cadastrado para esta matéria.
+                </p>
+              ) : (
+                professoresDaMateria.map((professor) => {
+                  const src = getImageSrc(professor.id);
+                  return (
+                    <div key={professor.id} className={styles.listItem}>
+                      <div className={styles.itemInfo}>
+                        <div className={styles.avatar}>
+                          {src ? (
+                            <img src={src} alt={professor.nome} />
+                          ) : (
+                            <span>{professor.nome.charAt(0).toUpperCase()}</span>
+                          )}
+                        </div>
+                        <div>
+                          <h3>{professor.nome}</h3>
+                          <span className={styles.materiaTag}>
+                            {professor.materiaNome}
+                          </span>
+                        </div>
+                      </div>
+                      <div className={styles.itemActions}>
+                        <button type="button" className={styles.primaryBtn}>
+                          Ver aulas
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </section>
+        </div>
       </main>
     </div>
   );
 };
 
-export default DashboardPage;
+export default DashboardAluno;
