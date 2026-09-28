@@ -18,10 +18,8 @@ import com.projeto.oficinas_backend.dtos.ProfessorRequestDto;
 import com.projeto.oficinas_backend.dtos.ProfessorResponseDto;
 import com.projeto.oficinas_backend.models.Materia;
 import com.projeto.oficinas_backend.models.Professor;
-import com.projeto.oficinas_backend.models.User;
 import com.projeto.oficinas_backend.repositories.MateriaRepository;
 import com.projeto.oficinas_backend.repositories.ProfessorRepository;
-import com.projeto.oficinas_backend.repositories.UserRepository;
 
 @RestController
 @RequestMapping("/professores")
@@ -29,29 +27,23 @@ public class ProfessorController {
 
     private final ProfessorRepository professorRepository;
     private final MateriaRepository materiaRepository;
-    private final UserRepository userRepository;
 
     public ProfessorController(ProfessorRepository professorRepository,
-                               MateriaRepository materiaRepository,
-                               UserRepository userRepository) {
+                               MateriaRepository materiaRepository) {
         this.professorRepository = professorRepository;
         this.materiaRepository = materiaRepository;
-        this.userRepository = userRepository;
     }
 
     private ProfessorResponseDto toDto(Professor professor) {
         Materia materia = professor.getMateria();
-        User user = professor.getUser();
         return new ProfessorResponseDto(
                 professor.getId(),
                 professor.getNome(),
                 materia != null ? materia.getId() : null,
                 materia != null ? materia.getNome() : null,
-                user != null ? user.getId() : null,
                 professor.getGravacaoAutomatica());
     }
 
-    // Preenche o professor com os dados do DTO. Retorna a mensagem de erro (ou null se deu tudo certo).
     private String aplicarDados(Professor professor, ProfessorRequestDto dto) {
         if (dto.nome() == null || dto.nome().isBlank()) {
             return "O nome do professor é obrigatório.";
@@ -66,16 +58,6 @@ public class ProfessorController {
             professor.setMateria(materia.get());
         } else {
             professor.setMateria(null);
-        }
-
-        if (dto.userId() != null) {
-            Optional<User> user = userRepository.findById(dto.userId());
-            if (user.isEmpty()) {
-                return "Usuário não encontrado.";
-            }
-            professor.setUser(user.get());
-        } else {
-            professor.setUser(null);
         }
 
         if (dto.gravacaoAutomatica() != null) {

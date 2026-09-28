@@ -30,10 +30,6 @@ public class Professor {
     @JoinColumn(name = "materia_id")
     private Materia materia;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id")
-    private User user;
-
     @Column(name = "gravacao_automatica")
     private Boolean gravacaoAutomatica = true;
 }

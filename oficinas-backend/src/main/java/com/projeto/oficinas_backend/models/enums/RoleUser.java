@@ -1,7 +1,6 @@
-package com.projeto.oficinas_backend.models.enums;  
+package com.projeto.oficinas_backend.models.enums;
 
 public enum RoleUser {
     admin,
-    professor,
     aluno
 }
