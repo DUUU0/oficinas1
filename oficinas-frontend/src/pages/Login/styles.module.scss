@@ -154,3 +154,21 @@ $accent-blue: #2563eb;
     line-height: 1.4;
   }
 }
+
+.switchAuth {
+  margin: 1.5rem 0 0 0;
+  text-align: center;
+  font-size: 0.85rem;
+  color: $text-muted;
+
+  a {
+    color: $accent-blue;
+    font-weight: 600;
+    margin-left: 0.25rem;
+
+    &:hover {
+      color: $primary-hover;
+      text-decoration: underline;
+    }
+  }
+}

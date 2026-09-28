@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast, Toaster } from "react-hot-toast";
 import userService from "../../services/UserService";
 import styles from "./styles.module.scss";
@@ -23,8 +23,16 @@ export const LoginPage: React.FC = () => {
           duration: 2000,
         });
 
-        // Redireciona diretamente para o Dashboard após o login
-        navigate("/dashboard");
+        // Redirecionamento baseado no perfil do usuário
+        if (userService.isAdmin()) {
+          navigate("/dashboardAdmin");
+        } else if (userService.isProfessor()) {
+          navigate("/dashboardProfessor");
+        } else if (userService.isAluno()) {
+          navigate("/dashboardAluno");
+        } else {
+          navigate("/dashboard");
+        }
       } else {
         toast.error("Credenciais inválidas. Tente novamente.");
       }
@@ -73,7 +81,9 @@ export const LoginPage: React.FC = () => {
           </div>
 
           <div className={styles.inputGroup}>
-            <label htmlFor="password">Senha</label>
+            <div className={styles.labelRow}>
+              <label htmlFor="password">Senha</label>
+            </div>
             <input
               id="password"
               type="password"
@@ -96,6 +106,10 @@ export const LoginPage: React.FC = () => {
 
         <div className={styles.footer}>
           <p>Plataforma para acesso de professores, alunos e administradores.</p>
+          <p className={styles.switchAuth}>
+            Ainda não tem conta?{" "}
+            <Link to="/cadastroAluno">Criar conta</Link>
+          </p>
         </div>
       </div>
     </div>
