@@ -3,11 +3,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { PrivateRoute } from "./privateRoutes";
 import { AdminRoute } from "./adminRoutes";
 
-
 import Login from "../pages/Login";
 import Dashboard from "../pages/DashboardAluno";
 import CadastroAluno from "../pages/CadastroAluno";
 import DashboardAdmin from "../pages/DashboardAdmin";
+import AulasProfessor from "../pages/AulasProfessor";
 
 function RoutesApp() {
   return (
@@ -33,6 +33,15 @@ function RoutesApp() {
               <AdminRoute>
                 <DashboardAdmin />
               </AdminRoute>
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/aulas/:professorId"
+          element={
+            <PrivateRoute>
+              <AulasProfessor />
             </PrivateRoute>
           }
         />

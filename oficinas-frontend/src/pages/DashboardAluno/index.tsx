@@ -3,6 +3,7 @@ import { toast, Toaster } from "react-hot-toast";
 import userService from "../../services/UserService";
 import { apiClient } from "../../services/api";
 import styles from "./styles.module.scss";
+import { useNavigate } from "react-router-dom";
 
 interface Materia {
   id: number;
@@ -31,6 +32,8 @@ export const DashboardAluno: React.FC = () => {
   const [faces, setFaces] = useState<Face[]>([]);
   const [selectedMateriaId, setSelectedMateriaId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     let active = true;
@@ -220,7 +223,11 @@ export const DashboardAluno: React.FC = () => {
                         </div>
                       </div>
                       <div className={styles.itemActions}>
-                        <button type="button" className={styles.primaryBtn}>
+                        <button
+                          type="button"
+                          className={styles.primaryBtn}
+                          onClick={() => navigate(`/aulas/${professor.id}`)}
+                        >
                           Ver aulas
                         </button>
                       </div>
