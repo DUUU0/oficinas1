@@ -198,7 +198,6 @@ export const DashboardAdmin: React.FC = () => {
     const payload = {
       nome: professorNome,
       materiaId: professorMateriaId ? Number(professorMateriaId) : null,
-      userId: editingProfessor?.userId ?? null,
       gravacaoAutomatica: professorGravacaoAuto,
     };
 

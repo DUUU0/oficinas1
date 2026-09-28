@@ -14,7 +14,6 @@ interface Professor {
   nome: string;
   materiaId: number | null;
   materiaNome: string | null;
-  userId: number | null;
   gravacaoAutomatica: boolean;
 }
 

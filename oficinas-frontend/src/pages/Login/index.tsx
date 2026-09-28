@@ -26,8 +26,6 @@ export const LoginPage: React.FC = () => {
         // Redirecionamento baseado no perfil do usuário
         if (userService.isAdmin()) {
           navigate("/dashboardAdmin");
-        } else if (userService.isProfessor()) {
-          navigate("/dashboardProfessor");
         } else if (userService.isAluno()) {
           navigate("/dashboardAluno");
         } else {

@@ -1,6 +1,6 @@
 import { apiClient } from "./api";
 
-export type RoleUser = "admin" | "professor" | "aluno";
+export type RoleUser = "admin" | "aluno";
 
 type LoginCredentials = {
   email: string;
@@ -67,10 +67,6 @@ class UserService {
 
   isAdmin(): boolean {
     return this.getRole() === "admin";
-  }
-
-  isProfessor(): boolean {
-    return this.getRole() === "professor";
   }
 
   isAluno(): boolean {

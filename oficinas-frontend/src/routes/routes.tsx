@@ -5,7 +5,7 @@ import { AdminRoute } from "./adminRoutes";
 
 
 import Login from "../pages/Login";
-import Dashboard from "../pages/Dashboard";
+import Dashboard from "../pages/DashboardAluno";
 import CadastroAluno from "../pages/CadastroAluno";
 import DashboardAdmin from "../pages/DashboardAdmin";
 
