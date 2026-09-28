@@ -268,7 +268,7 @@ export const DashboardAdmin: React.FC = () => {
           <div className={styles.logoIcon}>PT</div>
           <div>
             <h1>Painel Administrativo</h1>
-            <span>Pan-Tilt Autônomo • UTFPR</span>
+            <span>Pan-Tilt Autônomo</span>
           </div>
         </div>
 
