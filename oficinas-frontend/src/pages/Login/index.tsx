@@ -59,7 +59,6 @@ export const LoginPage: React.FC = () => {
 
       <div className={styles.loginCard}>
         <div className={styles.header}>
-          <span className={styles.badge}>UTFPR • Oficinas de Integração 1</span>
           <h1 className={styles.title}>Pan-Tilt Autônomo</h1>
           <p className={styles.subtitle}>
             Rastreamento Facial e Gravação Inteligente de Aulas

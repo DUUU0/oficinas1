@@ -64,7 +64,6 @@ export const CadastroAluno: React.FC = () => {
 
       <div className={styles.registerCard}>
         <div className={styles.header}>
-          <span className={styles.badge}>UTFPR • Oficinas de Integração 1</span>
           <h1 className={styles.title}>Criar conta de aluno</h1>
           <p className={styles.subtitle}>
             Cadastre-se para assistir às aulas gravadas e baixar as transcrições da lousa
@@ -139,9 +138,6 @@ export const CadastroAluno: React.FC = () => {
           <Link to="/">Entrar</Link>
         </p>
 
-        <div className={styles.footer}>
-          <p>Contas de professor e administrador são criadas pela coordenação.</p>
-        </div>
       </div>
     </div>
   );
