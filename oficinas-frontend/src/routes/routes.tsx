@@ -1,9 +1,13 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+
 import { PrivateRoute } from "./privateRoutes";
+import { AdminRoute } from "./adminRoutes";
 
 
 import Login from "../pages/Login";
 import Dashboard from "../pages/Dashboard";
+import CadastroAluno from "../pages/CadastroAluno";
+import DashboardAdmin from "../pages/DashboardAdmin";
 
 function RoutesApp() {
   return (
@@ -11,8 +15,10 @@ function RoutesApp() {
       <Routes>
         <Route path="/" element={<Login />} />
 
+        <Route path="/cadastroAluno" element={<CadastroAluno />} />
+
         <Route
-          path="/dashboard"
+          path="/dashboardAluno"
           element={
             <PrivateRoute>
               <Dashboard />
@@ -20,6 +26,16 @@ function RoutesApp() {
           }
         />
 
+        <Route
+          path="/dashboardAdmin"
+          element={
+            <PrivateRoute>
+              <AdminRoute>
+                <DashboardAdmin />
+              </AdminRoute>
+            </PrivateRoute>
+          }
+        />
 
       </Routes>
     </BrowserRouter>

@@ -7,11 +7,24 @@ type LoginCredentials = {
   password: string;
 }
 
+type RegisterData = {
+  username: string;
+  email: string;
+  password: string;
+}
+
 type AuthResponse = {
   token: string;
   role?: RoleUser;
   tipo?: RoleUser;
   username: string;
+}
+
+type RegisterResponse = {
+  id: number;
+  username: string;
+  email: string;
+  tipo: RoleUser;
 }
 
 class UserService {
@@ -32,6 +45,17 @@ class UserService {
       return null;
     } catch (error) {
       console.error("Falha na autenticação:", error);
+      throw error;
+    }
+  }
+
+  // Cadastro público: o backend sempre cria o usuário com o papel "aluno"
+  async register(data: RegisterData): Promise<RegisterResponse> {
+    try {
+      const { data: user } = await apiClient.post<RegisterResponse>("/auth/register", data);
+      return user;
+    } catch (error) {
+      console.error("Falha no cadastro:", error);
       throw error;
     }
   }
@@ -63,7 +87,7 @@ class UserService {
 
   logOut() {
     sessionStorage.clear();
-    window.location.href = "/login";
+    window.location.href = "/";
   }
 }
 
