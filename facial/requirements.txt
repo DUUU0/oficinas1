@@ -1,0 +1,13 @@
+# reconhecimentoFacial.py
+# "contrib" (com janelas). Se alguma biblioteca instalar o opencv-*-headless, ele sobrescreve
+# o cv2 e o cv2.imshow para de funcionar: desinstale os dois e instale só este de novo.
+opencv-contrib-python==5.0.0.93
+numpy==2.4.6
+pillow==12.3.0
+psycopg[binary]==3.3.8
+pyserial==3.5
+
+# letras.py (OCR do quadro)
+easyocr==1.7.2
+torch==2.14.1
+torchvision==0.29.1
